@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="text-center">
+    <strong>Welcome Tweeters!</strong>
+</h2>
+<p></p>
+<div id='tweets'>
+    Replace me
+</div>
+
+<div class='row'>
+    <div class='col-md-4 mx-auto col-10'>
+        <form class='form' method='POST' action='/create-tweet'>
+            {% csrf_token %}
+            <input type='hidden' value='/' name='next' />
+            <textarea class='form-control' name='content' placeholder='Your tweet...'></textarea>
+            <button type='submit' class='btn btn-primary'>tweet</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const tweetsElem = document.getElementById('tweets');
+    tweetsElem.innerHTML = 'Loading...';
+
+    const xhr = new XMLHttpRequest();
+    const method = 'GET';
+    const url = '/tweets';
+    const responseType = 'json';
+
+    xhr.responseType = responseType;
+    xhr.open(method, url);
+    xhr.onload = () => {
+        const serverResponse = xhr.response;
+        var listedTweets = serverResponse;
+        var allTweets = '';
+        for (i=0;i < listedTweets.length; i++) {
+            allTweets = allTweets + formatTweetElem(listedTweets[i]);
+        };
+        tweetsElem.innerHTML = allTweets;
+    };
+    xhr.send();
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    };
+
+    function handleDidLike(tweet_id, currentCount) {
+        console.log(tweet_id, currentCount);
+        const csrftoken = getCookie('csrftoken');
+
+        const url = "/api/tweets/action";
+        const method = "POST";
+        const data = JSON.stringify({
+            id: tweet_id,
+            action: "like",
+        });
+
+        const xhr = new XMLHttpRequest();
+        xhr.open(method, url);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("HTTP_X_REQUESTED_WITH", "XMLHttpRequest");
+        xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        xhr.onload = function() {
+            console.log(xhr.status, xhr.response);
+        };
+        xhr.send(data);
+
+        return;
+    };
+
+    function LikeBtn(tweet) {
+        return "<button class='btn btn-primary btn-sm' onclick=handleDidLike(" + tweet.id + "," + tweet.likes + ")>" + tweet.likes + " Likes</button>";
+    };
+
+    function formatTweetElem(tweet) {
+        var formatTweet = "<div class='col-12 col-md-10 mx-auto rounded border fluid py-3 mb-4 tweet' id='tweet-" + tweet.id + "'><p>" + tweet.content + "</p><div class='btn-group'>" + 
+            LikeBtn(tweet) + "</div></div>";
+        return formatTweet;
+    };
+</script>
+{% endblock content %}

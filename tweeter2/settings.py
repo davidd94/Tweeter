@@ -30,8 +30,11 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+# '.domain.com' will cover all of your domain
+ALLOWED_HOSTS = ['127.0.0.1', '.domain.com', 'localhost']
+LOGIN_URL = "/login"
+MAX_TWEET_LENGTH = 240
+TWEET_ACTION_OPTIONS = ["like", "unlink", "retweet"]
 
 # Application definition
 
@@ -43,6 +46,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # third party
+    'rest_framework',
+
+    # internals
     'tweets',
 ]
 
@@ -61,7 +68,7 @@ ROOT_URLCONF = 'tweeter2.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -76,6 +83,22 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'tweeter2.wsgi.application'
 
+DEFAULT_RENDERER_CLASSES = [
+    'rest_framework.renderers.JSONRenderer',
+]
+
+if DEBUG:
+    DEFAULT_RENDERER_CLASSES += [
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': DEFAULT_RENDERER_CLASSES,
+    'DEFAULT_PERMISSION_CLASSES': [
+        # 'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.permissions.IsAuthenticated',
+    ]
+}
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
