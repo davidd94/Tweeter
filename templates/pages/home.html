@@ -5,11 +5,12 @@
     <strong>Welcome Tweeters!</strong>
 </h2>
 <p></p>
-<div id='tweets'>
-    Replace me
+<div id='tweeter-2'></div>
+<div id='tweets' class="d-none">
+    Loading...
 </div>
 
-<div class='row'>
+<div class='row d-none'>
     <div class='col-md-4 mx-auto col-10'>
         <form class='form' method='POST' action='/create-tweet'>
             {% csrf_token %}

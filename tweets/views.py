@@ -9,6 +9,7 @@ from .serializers import TweetCreateSerializer, TweetSerializer, TweetActionSeri
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import SessionAuthentication
+from tweeter2.rest_api.dev import DevAuthentication
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 
 ALLOWED_HOSTS = settings.ALLOWED_HOSTS
@@ -18,10 +19,10 @@ def home_view(request, *args, **kwargs):
     return render(request, "pages/home.html", context={}, status=200)
 
 @api_view(['POST'])
-@authentication_classes([SessionAuthentication])
+@authentication_classes([SessionAuthentication, DevAuthentication])
 @permission_classes([IsAuthenticated])
 def tweet_create_view(request, *args, **kwargs):
-    data = request.POST
+    data = request.data
     serializer = TweetCreateSerializer(data=data)
     if serializer.is_valid(raise_exception=True):
         serializer.save(user=request.user)
@@ -33,7 +34,7 @@ def tweet_list_view(request, *args, **kwargs):
     qs = Tweet.objects.all()
     serializer = TweetSerializer(qs, many=True)
     
-    return Response(serializer.data)
+    return Response(serializer.data, status=200)
 
 @api_view(['GET'])
 def tweet_view(request, tweet_id, *args, **kwargs):
@@ -96,12 +97,9 @@ def tweet_list_view_pure_django(request, *args, **kwargs):
     return json data
     """
     qs = Tweet.objects.all()
-    tweet_list = [x.serialize() for x in qs]
+    serializer = TweetSerializer(qs, many=True)
     
-    data = {
-        "response": tweet_list
-    }
-    return JsonResponse(data)
+    return JsonResponse(serializer.data, safe=False)
 
 def tweet_view_pure_django(request, tweet_id, *args, **kwargs):
     """
