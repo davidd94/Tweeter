@@ -6,6 +6,6 @@ export function apiProfileDetail(username, callback) {
 }
 
 export function apiProfileFollowToggle(username, action, callback) {
-    const data = {action: action}
+    const data = {action: `${action && action}`.toLowerCase()}
     backendLookup("POST", `/profiles/${username}/follow`, callback, data)
 }

@@ -1,7 +1,8 @@
 import React, {useState, useEffect} from 'react';
 
-import {apiProfileDetail} from './lookup';
+import {apiProfileDetail, apiProfileFollowToggle} from './lookup';
 import {UserDisplay, UserPicture} from './components';
+import {DisplayCount} from './utils';
 
 
 function ProfileBadge(props) {
@@ -19,6 +20,10 @@ function ProfileBadge(props) {
     return user ? <div>
         <UserPicture user={user} hideLink />
         <p><UserDisplay user={user} includeFullName hideLink /></p>
+        <p><DisplayCount>{user.follower_count}</DisplayCount> followers</p>
+        <p><DisplayCount>{user.following_count}</DisplayCount> following</p>
+        <p>{user.location}</p>
+        <p>{user.bio}</p>
         <button className='btn btn-primary' onClick={handleFollowToggle}>{currentVerb}</button>
     </div> : null;
 }
@@ -43,7 +48,12 @@ export function ProfileBadgeComponent (props) {
     }, [username, didLookup, setDidLookup])
 
     const handleNewFollow = (actionVerb) => {
-        console.log(actionVerb);
+        apiProfileFollowToggle(username, actionVerb, (response, status) => {
+            if (status === 200) {
+                setProfile(response);
+            }
+            setProfileLoading(false);
+        });
         setProfileLoading(true);
     }
 
